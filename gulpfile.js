@@ -1,5 +1,7 @@
 "use strict";
 
+require('dotenv').config()
+
 var gulp = require('gulp'),
     uglify = require('gulp-uglify'),
     less = require('gulp-less'),
@@ -11,10 +13,10 @@ var gulp = require('gulp'),
     autoprefixer = require('gulp-autoprefixer'),
     path = require('path');
 
-var outputFolder = 'dist/';
+var outputFolder = process.env.MDP_OUTPUT_DIR || 'dist/';
 var moduleName = 'mdPickers';
 
-gulp.task('assets', function() {
+function assets() {
   return gulp.src(['src/core/**/*.less', 'src/components/**/*.less'])
         .pipe(concat('mdPickers.less'))
         .pipe(less())
@@ -23,9 +25,9 @@ gulp.task('assets', function() {
         .pipe(rename({suffix: '.min'}))
         .pipe(minify())
         .pipe(gulp.dest(outputFolder));
-});
+};
 
-gulp.task('build-app', function() {  
+function buildApp() {
     return gulp.src(['src/mdPickers.js', 'src/core/**/*.js', 'src/components/**/*.js'])
         .pipe(concat('mdPickers.js'))
         .pipe(wrap('(function() {\n"use strict";\n<%= contents %>\n})();'))
@@ -35,10 +37,13 @@ gulp.task('build-app', function() {
         .pipe(uglify())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(outputFolder));
-});
+};
 
-gulp.task('watch', function() {
-    gulp.watch('src/**/*', ['assets', 'build-app']);
-});
+function watch() {
+    gulp.watch('src/**/*', gulp.parallel(assets, buildApp));
+};
 
-gulp.task('default', ['assets', 'build-app']);
+exports.assets = assets;
+exports['build-app'] = buildApp;
+exports.watch = watch;
+exports.default = gulp.task('default', gulp.parallel(assets, buildApp))

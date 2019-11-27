@@ -1,3 +1,8 @@
+### 0.8.0
+
+- Gulp 4 upgrade
+- Override output folder with MDP_OUTPUT_DIR
+
 ### 0.7.5
 
 Minor bugfixes
